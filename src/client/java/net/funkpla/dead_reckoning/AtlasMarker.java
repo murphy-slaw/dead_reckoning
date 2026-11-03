@@ -8,7 +8,7 @@ import folk.sisby.surveyor.landmark.component.LandmarkComponentTypes;
 import lombok.Getter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -75,5 +75,5 @@ public class AtlasMarker {
   }
 
   public record Texture(
-      ResourceLocation id, ResourceLocation accentId, int width, int height, ItemStack stack) {}
+      Identifier id, Identifier accentId, int width, int height, ItemStack stack) {}
 }

@@ -17,7 +17,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,8 +33,8 @@ public class DeadReckoning implements ClientModInitializer {
   public static final String MOD_NAME = "Dead Reckoning";
   public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
   public static final DeadReckoningConfig CONFIG = DeadReckoningConfig.createToml(FabricLoader.getInstance().getConfigDir(), "", MOD_ID, DeadReckoningConfig.class);
-  public static final TagKey<Item> COMMON_COMPASSES = TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation("c", "compasses"));
-  public static final TagKey<Item> COMPASSES = TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation(DeadReckoning.MOD_ID, "compasses"));
+  public static final TagKey<Item> COMMON_COMPASSES = TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.fromNamespaceAndPath("c", "compasses"));
+  public static final TagKey<Item> COMPASSES = TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.of(DeadReckoning.MOD_ID, "compasses"));
   @Nullable
   @Getter @Setter private static List<Landmark> landmarks;
   @Getter @Setter private static boolean HUD_ENABLED = true;
@@ -42,15 +42,15 @@ public class DeadReckoning implements ClientModInitializer {
     "key.dead_reckoning.toggle",
     InputConstants.Type.KEYSYM,
     GLFW.GLFW_KEY_PERIOD,
-    "category.dead_reckoning.general");
+    net.minecraft.client.KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("dead_reckoning", "general")));
 
   public static void invalidateLandmarks() {
     setLandmarks(null);
   }
 
   public static boolean isCompass(ItemStack stack) {
-    Registry<Item> registry = Minecraft.getInstance().level.registryAccess().registry(Registries.ITEM).orElseThrow();
-    return registry.getTag(COMPASSES).isPresent() ? stack.is(COMPASSES) : registry.getTag(COMMON_COMPASSES).isPresent() ? stack.is(COMMON_COMPASSES) : CONFIG.compassItems.contains(registry.getKey(stack.getItem()).toString());
+    var registry = Minecraft.getInstance().level.registryAccess().lookupOrThrow(Registries.ITEM);
+    return stack.is(COMPASSES) || stack.is(COMMON_COMPASSES) || CONFIG.compassItems.contains(registry.getKey(stack.getItem()).identifier().toString());
   }
 
   @Override
@@ -64,11 +64,11 @@ public class DeadReckoning implements ClientModInitializer {
     KeyBindingHelper.registerKeyBinding(TOGGLE_HUD_KEY);
 
     SurveyorClientEvents.Register.landmarksAdded(
-      new ResourceLocation(MOD_ID, "landmarks_added"),
+      Identifier.of(MOD_ID, "landmarks_added"),
       (worldLandmarks, landmarks) -> invalidateLandmarks());
 
     SurveyorClientEvents.Register.landmarksRemoved(
-      new ResourceLocation(MOD_ID, "landmarks_removed"),
+      Identifier.of(MOD_ID, "landmarks_removed"),
       (worldLandmarks, landmarks) -> invalidateLandmarks());
 
     ClientTickEvents.END_CLIENT_TICK.register(
